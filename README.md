@@ -1,73 +1,36 @@
-# React + TypeScript + Vite
+# 建築基地綠化法規檢核系統
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+輸入植栽資料，自動計算並判斷是否符合法定綠化標準。
 
-Currently, two official plugins are available:
+## 支援法規
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+| 城市 | 法規 | 施行日期 |
+|------|------|----------|
+| 台北市 | 新建築物綠化實施規則 | 民國 115 年 1 月 1 日 |
+| 新北市 | 建築基地綠化自治條例 | 建置中 |
 
-## React Compiler
+## 台北市檢核項目
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| 條文 | 內容 |
+|------|------|
+| 第4條 | 建築基地分類（五類） |
+| 第5條 | 綠覆率、綠容率計算 |
+| 第6條 | 固碳當量（係數待技術規範確認） |
+| 第7條 | 法定空地植栽配置（含臨道路） |
+| 第8條 | 立體綠化（高／低遮蔭分開） |
+| 第9條 | 屋頂平臺綠化 |
+| 第10條 | 綠覆面積計算方式 |
+| 第12條 | 透水鋪面 |
 
-## Expanding the ESLint configuration
+## 本地開發
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+開啟 http://localhost:5173
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 技術棧
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+React 19 + TypeScript + Vite + Tailwind CSS v4

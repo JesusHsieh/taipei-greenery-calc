@@ -7,11 +7,13 @@ type Props = Pick<GreeneryCalc,
   | 'baseArea' | 'setBaseArea'
   | 'bcr' | 'setBcr'
   | 'nonGreenable' | 'setNonGreenable'
-  | 'std' | 'legalSpace' | 'calcFootprint' | 'minGreen' | 'totalGreen'
+  | 'alphaInput' | 'setAlphaInput'
+  | 'std' | 'legalSpace' | 'calcFootprint' | 'A_prime' | 'totalGreen'
 >;
 
 export function SiteBasics({ buildingClass, setBuildingClass, baseArea, setBaseArea, bcr, setBcr,
-  nonGreenable, setNonGreenable, std, legalSpace, calcFootprint, minGreen, totalGreen }: Props) {
+  nonGreenable, setNonGreenable, alphaInput, setAlphaInput,
+  std, legalSpace, calcFootprint, A_prime, totalGreen }: Props) {
   return (
     <>
       {/* ── 第4條：建築基地分類 ── */}
@@ -56,19 +58,27 @@ export function SiteBasics({ buildingClass, setBuildingClass, baseArea, setBaseA
               → 建築面積：<span className="font-bold text-emerald-600">{calcFootprint.toFixed(2)} m²</span>
             </p>
           </div>
-          <div className="md:col-span-2">
-            <label className={labelCls}>無法綠化面積 (m²)</label>
+          <div>
+            <label className={labelCls}>無法綠化面積 Ap (m²)</label>
             <input type="number" value={nonGreenable} onChange={e => setNonGreenable(e.target.value)}
               className={inputCls} placeholder="0" min="0" />
-            <p className="text-xs text-slate-400 mt-1">如：汽車坡道、設備機房基座等不可種植區域</p>
+            <p className="text-xs text-slate-400 mt-1">消防救災空間、騎樓、基地內通路、戶外運動設施等</p>
+          </div>
+          <div>
+            <label className={labelCls}>生態綠化修正係數 α</label>
+            <input type="number" value={alphaInput} onChange={e => setAlphaInput(e.target.value)}
+              className={inputCls} placeholder="0.80" min="0.8" max="1.3" step="0.01" />
+            <p className="text-xs text-slate-400 mt-1">
+              0.80（無計畫）～ 1.30（全面原生/誘鳥誘蝶植物）；無計畫書填 0.80
+            </p>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3 bg-emerald-50 rounded-xl p-4 border border-emerald-200">
           {[
-            { label: '法定空地面積', val: legalSpace, sub: '= 基地 × (1 − 建蔽率)' },
-            { label: '最小綠化面積', val: minGreen,   sub: '= 法定空地 − 無法綠化' },
+            { label: '法定空地面積', val: legalSpace, sub: '= A₀ × (1 − r)' },
+            { label: "最小綠化面積 A'", val: A_prime, sub: '= max((A₀−Ap)×(1−r), 0.15×A₀)' },
             { label: '目前總綠覆面積', val: totalGreen, sub: '= 所有植栽合計',
-              highlight: totalGreen >= minGreen * (std.cover / 100) },
+              highlight: legalSpace > 0 ? totalGreen / legalSpace * 100 >= std.cover : undefined },
           ].map(({ label, val, sub, highlight }) => (
             <div key={label} className="bg-white rounded-lg p-3 text-center shadow-sm">
               <div className="text-xs text-slate-500">{label}</div>

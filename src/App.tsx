@@ -80,8 +80,9 @@ export default function App() {
               baseArea={c.baseArea} setBaseArea={c.setBaseArea}
               bcr={c.bcr} setBcr={c.setBcr}
               nonGreenable={c.nonGreenable} setNonGreenable={c.setNonGreenable}
+              alphaInput={c.alphaInput} setAlphaInput={c.setAlphaInput}
               std={c.std} legalSpace={c.legalSpace} calcFootprint={c.calcFootprint}
-              minGreen={c.minGreen} totalGreen={c.totalGreen}
+              A_prime={c.A_prime} totalGreen={c.totalGreen}
             />
 
             <Article7
@@ -104,6 +105,7 @@ export default function App() {
               groundPond={c.groundPond}   setGroundPond={c.setGroundPond}
               groundWallW={c.groundWallW} setGroundWallW={c.setGroundWallW}
               groundWallF={c.groundWallF} setGroundWallF={c.setGroundWallF}
+              ecoLayerArea={c.ecoLayerArea} setEcoLayerArea={c.setEcoLayerArea}
               roadsideSpace={c.roadsideSpace} setRoadsideSpace={c.setRoadsideSpace}
               rsL={c.rsL} setRsL={c.setRsL} rsM={c.rsM} setRsM={c.setRsM} rsS={c.rsS} setRsS={c.setRsS}
               hsArea={c.hsArea} lsArea={c.lsArea}
@@ -148,9 +150,11 @@ export default function App() {
               totalGreen={c.totalGreen} effectiveGreen={c.effectiveGreen}
               coverRate={c.coverRate} volumeRate={c.volumeRate} std={c.std}
               actualCarbon={c.actualCarbon} reqCarbon={c.reqCarbon}
-              grassArea={c.grassArea} ditchExtra={c.ditchExtra} brickArea={c.brickArea}
-              pondArea={c.pondArea} wallArea={c.wallArea}
-              vertOtherArea={c.vertOtherArea} roofOtherArea={c.roofOtherArea}
+              alpha={c.alpha} A_prime={c.A_prime}
+              ecoLayerVal={c.ecoLayerVal}
+              carbonLargeArea={c.carbonLargeArea}
+              carbonSmallArea={c.carbonSmallArea}
+              carbonPalmArea={c.carbonPalmArea}
             />
 
             <CheckResults checks={c.checks} />

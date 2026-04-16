@@ -10,6 +10,9 @@ export function useGreeneryCalc() {
   const [bcr,           setBcr]           = useState('');
   const [nonGreenable,  setNonGreenable]  = useState('');
 
+  // ── 第6條：生態綠化修正係數 α（0.80–1.30；無生態綠化計畫填 0.80）────────
+  const [alphaInput, setAlphaInput] = useState('0.80');
+
   // ── 第7條：法定空地 — 高遮蔭喬木（3 覆土深度 × 4 米高徑）─────────────────
   const [hs150L,setHs150L]=useState(''); const [hs150M,setHs150M]=useState('');
   const [hs150S,setHs150S]=useState(''); const [hs150P,setHs150P]=useState('');
@@ -25,6 +28,9 @@ export function useGreeneryCalc() {
   const [ls120S,setLs120S]=useState(''); const [ls120P,setLs120P]=useState('');
   const [ls100L,setLs100L]=useState(''); const [ls100M,setLs100M]=useState('');
   const [ls100S,setLs100S]=useState(''); const [ls100P,setLs100P]=useState('');
+
+  // ── 第7條：法定空地 — 生態複層（喬木間距≤3.5m 密植混種區）────────────────
+  const [ecoLayerArea, setEcoLayerArea] = useState('');
 
   // ── 第7條：法定空地 — 灌木、其他植栽 ────────────────────────────────────
   const [groundShrub, setGroundShrub] = useState('');
@@ -67,7 +73,14 @@ export function useGreeneryCalc() {
   const base          = n(baseArea);
   const legalSpace    = base * (1 - n(bcr) / 100);
   const calcFootprint = base * n(bcr) / 100;
-  const minGreen      = Math.max(0, legalSpace - n(nonGreenable));
+
+  // A'（最小綠化面積）— 技術規範公式(4)：(A₀-Ap)×(1-r)，且不得低於 0.15×A₀
+  const A_prime = base > 0
+    ? Math.max((base - n(nonGreenable)) * (1 - n(bcr) / 100), 0.15 * base)
+    : 0;
+
+  // α（生態綠化修正係數）— 全無生態綠化者為 0.8，全面者為 1.3
+  const alpha = Math.max(0.8, Math.min(1.3, n(alphaInput) || 0.8));
 
   // ── 計算：法定空地喬木 ────────────────────────────────────────────────────
   const hsArea = useMemo(() =>
@@ -107,7 +120,7 @@ export function useGreeneryCalc() {
   const roofGreen     = roofHs + roofLs + roofPalm + roofShrubArea + roofOtherArea;
   const greenableRoof = Math.max(0, n(roofTotal) - n(roofNonGreen));
 
-  // ── 計算：各類別合計 ──────────────────────────────────────────────────────
+  // ── 計算：各類別合計（用於降溫係數/綠容率）──────────────────────────────
   const allHs      = hsArea + vertHsArea + roofHs;
   const allLs      = lsArea + vertLsArea + roofLs + roofPalm;
   const allShrub   = groundShrubArea + vertShrubArea + roofShrubArea;
@@ -121,12 +134,33 @@ export function useGreeneryCalc() {
     allShrub * COOL.shrub  + allOther * COOL.other;
   const volumeRate     = base > 0 ? effectiveGreen / base : 0;
 
-  // ── 第6條 ─────────────────────────────────────────────────────────────────
-  const actualCarbon =
-    allHs    * CARBON.highShade + allLs    * CARBON.lowShade +
-    allShrub * CARBON.shrub     + grassArea * CARBON.grass   +
-    (ditchExtra + brickArea + pondArea + wallArea + vertOtherArea + roofOtherArea) * CARBON.other;
-  const reqCarbon = (minGreen / 2) * std.carbon;
+  // ── 第6條：固碳計算 ───────────────────────────────────────────────────────
+  // 棕櫚類（P欄）獨立計算固碳 Gi=0.66（從 hs/ls 扣除）
+  const groundHsPalmArea = (n(hs150P)*1.0 + n(hs120P)*0.8 + n(hs100P)*0.6) * TREE_AREA.palm;
+  const groundLsPalmArea = (n(ls150P)*1.0 + n(ls120P)*0.8 + n(ls100P)*0.6) * TREE_AREA.palm;
+  const vertHsPalmCarbon = n(vertHsP) * TREE_AREA.palm;
+  const vertLsPalmCarbon = n(vertLsP) * TREE_AREA.palm;
+  // 棕櫚類總固碳面積（含屋頂）
+  const carbonPalmArea  = groundHsPalmArea + groundLsPalmArea + vertHsPalmCarbon + vertLsPalmCarbon + roofPalm;
+  // 闊葉大喬木（hs 扣除棕櫚，Gi=1.50）
+  const carbonLargeArea = allHs - groundHsPalmArea - vertHsPalmCarbon;
+  // 闊葉小喬木（ls 扣除棕櫚，Gi=1.00；roofPalm 已含在 allLs 中故須扣）
+  const carbonSmallArea = (lsArea - groundLsPalmArea) + (vertLsArea - vertLsPalmCarbon) + roofLs;
+
+  const ecoLayerVal = n(ecoLayerArea);
+
+  // TCO₂ = (ΣGi×Ai) × α — 技術規範公式(2)
+  const actualCarbon = (
+    ecoLayerVal     * CARBON.ecoLayer   +
+    carbonLargeArea * CARBON.largeBroad +
+    carbonSmallArea * CARBON.smallTree  +
+    carbonPalmArea  * CARBON.palm       +
+    allShrub        * CARBON.shrub      +
+    allOther        * CARBON.grass
+  ) * alpha;
+
+  // TCO₂c = 0.5 × A' × β — 技術規範公式(3)
+  const reqCarbon = A_prime > 0 ? (A_prime / 2) * std.carbon : 0;
 
   // ── 第7條第2項 ────────────────────────────────────────────────────────────
   const roadsideTrees = n(rsL)*TREE_AREA.large + n(rsM)*TREE_AREA.medium + n(rsS)*TREE_AREA.small;
@@ -155,9 +189,9 @@ export function useGreeneryCalc() {
     },
     {
       art: '第6條', name: '綠化總固碳當量',
-      req: `≥ ${reqCarbon.toFixed(2)} kg/yr`, act: `${actualCarbon.toFixed(2)} kg/yr`,
-      pass: minGreen > 0 ? actualCarbon >= reqCarbon : null,
-      formula: `½ × 最小綠化面積 ${minGreen.toFixed(2)} m² × ${std.carbon} kg/m²·yr`,
+      req: `≥ ${reqCarbon.toFixed(2)} kgCO₂e/yr`, act: `${actualCarbon.toFixed(2)} kgCO₂e/yr`,
+      pass: base > 0 ? actualCarbon >= reqCarbon : null,
+      formula: `(ΣGi×Ai)×α(${alpha.toFixed(2)}) ≥ 0.5×A'(${A_prime.toFixed(2)} m²)×β(${std.carbon})`,
     },
     {
       art: '第7條第2項', name: '臨道路開放空間喬木綠覆率',
@@ -193,6 +227,7 @@ export function useGreeneryCalc() {
     // ── Site ──
     buildingClass, setBuildingClass,
     baseArea, setBaseArea, bcr, setBcr, nonGreenable, setNonGreenable,
+    alphaInput, setAlphaInput,
     // ── Art7 HS trees ──
     hs150L,setHs150L, hs150M,setHs150M, hs150S,setHs150S, hs150P,setHs150P,
     hs120L,setHs120L, hs120M,setHs120M, hs120S,setHs120S, hs120P,setHs120P,
@@ -201,6 +236,8 @@ export function useGreeneryCalc() {
     ls150L,setLs150L, ls150M,setLs150M, ls150S,setLs150S, ls150P,setLs150P,
     ls120L,setLs120L, ls120M,setLs120M, ls120S,setLs120S, ls120P,setLs120P,
     ls100L,setLs100L, ls100M,setLs100M, ls100S,setLs100S, ls100P,setLs100P,
+    // ── Art7 eco-layer ──
+    ecoLayerArea, setEcoLayerArea,
     // ── Art7 ground other ──
     groundShrub,setGroundShrub, groundGrass,setGroundGrass, groundDitch,setGroundDitch,
     groundBrick,setGroundBrick, groundPond,setGroundPond,
@@ -218,7 +255,8 @@ export function useGreeneryCalc() {
     // ── Art12 ──
     pavTotal,setPavTotal, pavPerm,setPavPerm,
     // ── Computed ──
-    std, base, legalSpace, calcFootprint, minGreen,
+    std, base, legalSpace, calcFootprint, A_prime,
+    alpha,
     hsArea, lsArea, groundShrubArea, groundOther,
     grassArea, ditchExtra, brickArea, pondArea, wallArea,
     vertHsArea, vertLsArea, vertShrubArea, vertOtherArea,
@@ -226,6 +264,7 @@ export function useGreeneryCalc() {
     roofGreen, greenableRoof,
     allHs, allLs, allShrub, allOther, totalGreen,
     coverRate, effectiveGreen, volumeRate,
+    ecoLayerVal, carbonLargeArea, carbonSmallArea, carbonPalmArea,
     actualCarbon, reqCarbon,
     roadsideTrees, roadsideCover,
     roofRate, roofShrubPct,

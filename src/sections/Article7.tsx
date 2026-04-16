@@ -14,6 +14,8 @@ type Props = Pick<GreeneryCalc,
   | 'ls150L'|'setLs150L'|'ls150M'|'setLs150M'|'ls150S'|'setLs150S'|'ls150P'|'setLs150P'
   | 'ls120L'|'setLs120L'|'ls120M'|'setLs120M'|'ls120S'|'setLs120S'|'ls120P'|'setLs120P'
   | 'ls100L'|'setLs100L'|'ls100M'|'setLs100M'|'ls100S'|'setLs100S'|'ls100P'|'setLs100P'
+  // Eco-layer
+  | 'ecoLayerArea' | 'setEcoLayerArea'
   // Ground other
   | 'groundShrub'|'setGroundShrub'|'groundGrass'|'setGroundGrass'
   | 'groundDitch'|'setGroundDitch'|'groundBrick'|'setGroundBrick'
@@ -27,6 +29,7 @@ type Props = Pick<GreeneryCalc,
 >;
 
 export function Article7({
+  ecoLayerArea, setEcoLayerArea,
   hs150L,setHs150L,hs150M,setHs150M,hs150S,setHs150S,hs150P,setHs150P,
   hs120L,setHs120L,hs120M,setHs120M,hs120S,setHs120S,hs120P,setHs120P,
   hs100L,setHs100L,hs100M,setHs100M,hs100S,setHs100S,hs100P,setHs100P,
@@ -92,6 +95,20 @@ export function Article7({
         ]}
         total={lsArea}
       />
+
+      {/* 生態複層 */}
+      <div className="bg-teal-50 rounded-lg p-4 border border-teal-200 mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <label className={labelCls + ' mb-0 text-teal-900'}>生態複層面積 (m²)</label>
+          <Tag label="固碳 Gi=2.00" color="green" />
+        </div>
+        <input type="number" value={ecoLayerArea} onChange={e => setEcoLayerArea(e.target.value)}
+          className={inputCls} placeholder="0" min="0" />
+        <p className="text-xs text-teal-700 mt-1">
+          大小喬木、灌木、花草<strong>密植混種區</strong>（喬木間距≤3.5m），以樹冠總投影面積計。
+          使用此欄者，該區域的喬木<strong>請勿重複填入上方喬木欄</strong>。
+        </p>
+      </div>
 
       {/* 灌木 */}
       <div className="mb-4">

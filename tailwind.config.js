@@ -1,11 +1,52 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-    content: [
-        "./index.html",
-        "./src/**/*.{js,ts,jsx,tsx}",
-    ],
-    theme: {
-        extend: {},
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary:                   '#2e6767',
+        'primary-dim':             '#205b5b',
+        'primary-container':       '#b4edec',
+        'on-primary':              '#d9fffe',
+        'on-primary-container':    '#1f5a5a',
+        surface:                   '#f8f9fa',
+        'surface-bright':          '#f8f9fa',
+        'surface-dim':             '#d1dce0',
+        'surface-container-lowest':'#ffffff',
+        'surface-container-low':   '#f1f4f6',
+        'surface-container':       '#eaeff1',
+        'surface-container-high':  '#e3e9ec',
+        'surface-container-highest':'#dbe4e7',
+        'on-surface':              '#2b3437',
+        'on-surface-variant':      '#586064',
+        outline:                   '#737c7f',
+        'outline-variant':         '#abb3b7',
+        error:                     '#9f403d',
+        'error-container':         '#fe8983',
+        'on-error-container':      '#752121',
+        'tertiary-container':      '#d9f9df',
+        'on-tertiary-container':   '#45604d',
+        secondary:                 '#5c605f',
+        'secondary-container':     '#e0e3e2',
+        'on-secondary-container':  '#4f5252',
+      },
+      fontFamily: {
+        headline: ['Public Sans', 'sans-serif'],
+        body:     ['Inter', 'sans-serif'],
+      },
+      borderRadius: {
+        DEFAULT: '0.125rem',
+        sm:      '0.25rem',
+        md:      '0.375rem',
+        lg:      '0.5rem',
+        xl:      '0.75rem',
+        '2xl':   '1rem',
+        full:    '9999px',
+      },
     },
-    plugins: [],
+  },
+  plugins: [],
 }

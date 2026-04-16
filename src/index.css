@@ -1,13 +1,71 @@
 @import 'tailwindcss';
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  background-color: #f8f9fa;
+  color: #2b3437;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #f8f9fa;
 }
+
+h1, h2, h3, h4, .display-font {
+  font-family: 'Public Sans', sans-serif;
+}
+
+/* Input bottom-accent style */
+.input-accent {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid rgba(171, 179, 183, 0.3);
+  border-radius: 0;
+  outline: none;
+  width: 100%;
+  font-family: 'Public Sans', sans-serif;
+  font-weight: 700;
+  color: #2b3437;
+  transition: border-color 0.15s;
+}
+.input-accent:focus {
+  border-bottom-color: #2e6767;
+  box-shadow: none;
+}
+
+/* Standard input field */
+.input-field {
+  background: #ffffff;
+  border: none;
+  border-bottom: 2px solid rgba(171, 179, 183, 0.25);
+  border-radius: 0;
+  outline: none;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  color: #2b3437;
+  padding: 0.5rem 0;
+  transition: border-color 0.15s;
+}
+.input-field:focus {
+  border-bottom-color: #2e6767;
+  box-shadow: none;
+}
+
+/* Toggle switch */
+.toggle-track {
+  transition: background-color 0.2s;
+}
+.toggle-thumb {
+  transition: transform 0.2s;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f4f6; }
+::-webkit-scrollbar-thumb { background: #abb3b7; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #737c7f; }

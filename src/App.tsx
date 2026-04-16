@@ -198,6 +198,10 @@ export default function App() {
             <NtArticle8
               openSpace={nt.openSpace} setOpenSpace={nt.setOpenSpace}
               greenArea={nt.greenArea} setGreenArea={nt.setGreenArea}
+              nonGreenable43={nt.nonGreenable43} setNonGreenable43={nt.setNonGreenable43}
+              isDesignReview={nt.isDesignReview} setIsDesignReview={nt.setIsDesignReview}
+              roofArea44={nt.roofArea44} setRoofArea44={nt.setRoofArea44}
+              roofGreenEnergy44={nt.roofGreenEnergy44} setRoofGreenEnergy44={nt.setRoofGreenEnergy44}
               treeSmall={nt.treeSmall} setTreeSmall={nt.setTreeSmall}
               treeMedium={nt.treeMedium} setTreeMedium={nt.setTreeMedium}
               treeLarge={nt.treeLarge} setTreeLarge={nt.setTreeLarge}
@@ -215,6 +219,8 @@ export default function App() {
               grassBrickCover={nt.grassBrickCover} pondCover={nt.pondCover}
               vineCover={nt.vineCover} roofCover={nt.roofCover}
               totalCover={nt.totalCover} coverRate={nt.coverRate}
+              greenableArea43={nt.greenableArea43} requiredPlant43={nt.requiredPlant43} actualPlant43={nt.actualPlant43}
+              roofA44={nt.roofA44} roofGE44={nt.roofGE44} roofGreenRate44={nt.roofGreenRate44}
             />
 
             <NtCheckResults checks={nt.checks} />

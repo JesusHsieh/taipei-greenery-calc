@@ -5,6 +5,10 @@ import { cardCls, hCls, inputCls, labelCls } from '../styles';
 
 type Props = Pick<NewTaipeiCalc,
   | 'openSpace' | 'setOpenSpace' | 'greenArea' | 'setGreenArea'
+  | 'nonGreenable43' | 'setNonGreenable43'
+  | 'isDesignReview' | 'setIsDesignReview'
+  | 'roofArea44' | 'setRoofArea44'
+  | 'roofGreenEnergy44' | 'setRoofGreenEnergy44'
   | 'treeSmall' | 'setTreeSmall' | 'treeMedium' | 'setTreeMedium' | 'treeLarge' | 'setTreeLarge'
   | 'shrubArea' | 'setShrubArea'
   | 'groundCoverArea' | 'setGroundCoverArea'
@@ -16,10 +20,16 @@ type Props = Pick<NewTaipeiCalc,
   | 'treeSmallCount' | 'treeMediumCount' | 'treeLargeCount' | 'totalTreeCount' | 'requiredTrees'
   | 'treeCover' | 'shrubCover' | 'groundCover' | 'grassBrickCover' | 'pondCover' | 'vineCover' | 'roofCover'
   | 'totalCover' | 'coverRate'
+  | 'greenableArea43' | 'requiredPlant43' | 'actualPlant43'
+  | 'roofA44' | 'roofGE44' | 'roofGreenRate44'
 >;
 
 export function NtArticle8({
   openSpace, setOpenSpace, greenArea, setGreenArea,
+  nonGreenable43, setNonGreenable43,
+  isDesignReview, setIsDesignReview,
+  roofArea44, setRoofArea44,
+  roofGreenEnergy44, setRoofGreenEnergy44,
   treeSmall, setTreeSmall, treeMedium, setTreeMedium, treeLarge, setTreeLarge,
   shrubArea, setShrubArea,
   groundCoverArea, setGroundCoverArea,
@@ -31,9 +41,13 @@ export function NtArticle8({
   treeSmallCount, treeMediumCount, treeLargeCount, totalTreeCount, requiredTrees,
   shrubCover, groundCover, grassBrickCover, pondCover, vineCover, roofCover,
   totalCover, coverRate,
+  greenableArea43, requiredPlant43, actualPlant43,
+  roofA44, roofGreenRate44,
 }: Props) {
 
-  const treeEnough = ga > 0 ? totalTreeCount >= requiredTrees : null;
+  const treeEnough   = ga > 0 ? totalTreeCount >= requiredTrees : null;
+  const plant43Pass  = os > 0 ? actualPlant43 >= requiredPlant43 : null;
+  const roof44Pass   = isDesignReview ? (roofA44 > 0 ? roofGreenRate44 >= 50 : null) : null;
 
   return (
     <>
@@ -45,7 +59,7 @@ export function NtArticle8({
             <label className={labelCls}>實設空地面積 (m²) *</label>
             <input type="number" value={openSpace} onChange={e => setOpenSpace(e.target.value)}
               className={inputCls} placeholder="請輸入實設空地面積" min="0" />
-            <p className="text-xs text-slate-400 mt-1">綠覆率分母</p>
+            <p className="text-xs text-slate-400 mt-1">第43條植栽計算基礎、第8條綠覆率分母</p>
           </div>
           <div>
             <label className={labelCls}>應綠化範圍面積 (m²) *</label>
@@ -56,11 +70,59 @@ export function NtArticle8({
         </div>
       </div>
 
+      {/* ── 第43條：實設空地植栽面積 ── */}
+      <div className={cardCls}>
+        <h2 className={hCls}>第43條：實設空地植栽面積</h2>
+        <p className="text-xs text-slate-500 mb-4">
+          實設空地扣除無法綠化面積後，應留設 <strong>≥ 1/2</strong> 種植花草樹木；不足時得以屋頂、陽台等立體綠化補足。
+        </p>
+
+        <div className="mb-4">
+          <label className={labelCls}>無法綠化之面積 Ap (m²)</label>
+          <input type="number" value={nonGreenable43} onChange={e => setNonGreenable43(e.target.value)}
+            className={inputCls} placeholder="0" min="0" />
+          <p className="text-xs text-slate-400 mt-1">無遮簷人行道、裝卸位、現有道路及車道等</p>
+        </div>
+
+        <div className={`rounded-lg p-4 border-2 ${plant43Pass === true ? 'bg-emerald-50 border-emerald-400' : plant43Pass === false ? 'bg-red-50 border-red-400' : 'bg-slate-50 border-slate-300'}`}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="text-xs text-slate-500">應植栽面積（可綠化空地 × 50%）</div>
+              <div className="text-2xl font-bold text-slate-700">
+                {os > 0 ? `≥ ${requiredPlant43.toFixed(2)} m²` : '請填入實設空地面積'}
+              </div>
+              {os > 0 && (
+                <div className="text-xs text-slate-400 mt-0.5">
+                  ({os.toFixed(2)} − {n(nonGreenable43).toFixed(2)}) m² × 50% = {greenableArea43.toFixed(2)} × 0.5
+                </div>
+              )}
+            </div>
+            <div className="text-slate-300 font-bold text-xl">vs</div>
+            <div className="text-right">
+              <div className="text-xs text-slate-500">實際植栽面積</div>
+              <div className={`text-2xl font-bold ${plant43Pass === true ? 'text-emerald-700' : plant43Pass === false ? 'text-red-600' : 'text-slate-700'}`}>
+                {actualPlant43.toFixed(2)} m²
+              </div>
+              <div className="text-xs text-slate-400">喬木冠＋灌木＋地被＋植草磚＋生態池＋藤蔓＋立體</div>
+            </div>
+            {plant43Pass !== null && (
+              <div className={`text-lg font-bold px-3 py-1 rounded ${plant43Pass ? 'text-emerald-700 bg-emerald-100' : 'text-red-700 bg-red-100'}`}>
+                {plant43Pass ? '符合' : '不足'}
+              </div>
+            )}
+          </div>
+          {plant43Pass === false && os > 0 && (
+            <div className="mt-2 text-xs text-red-500">
+              尚缺 {(requiredPlant43 - actualPlant43).toFixed(2)} m² 植栽面積
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* ── 第8條(一)-3：喬木配置 ── */}
       <div className={cardCls}>
         <h2 className={hCls}>第8條(一)-3：喬木配置需求</h2>
 
-        {/* 附表一說明 */}
         <div className="bg-amber-50 rounded-lg p-3 mb-5 border border-amber-200">
           <p className="text-xs font-bold text-amber-800 mb-2">附表一：喬木綠覆面積計算標準（米高徑≥5cm）</p>
           <div className="grid grid-cols-3 gap-2 text-xs text-center">
@@ -81,7 +143,6 @@ export function NtArticle8({
           </p>
         </div>
 
-        {/* 喬木輸入 */}
         <div className="grid grid-cols-3 gap-4 mb-4">
           {[
             { label: '小喬木（5–7 cm）', val: treeSmall, set: setTreeSmall, cover: NT_TREE_COVER.small, count: treeSmallCount },
@@ -99,7 +160,6 @@ export function NtArticle8({
           ))}
         </div>
 
-        {/* 喬木需求判斷 */}
         <div className={`rounded-lg p-4 border-2 ${treeEnough === true ? 'bg-emerald-50 border-emerald-400' : treeEnough === false ? 'bg-red-50 border-red-400' : 'bg-slate-50 border-slate-300'}`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -136,7 +196,6 @@ export function NtArticle8({
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-          {/* 灌木 */}
           <div>
             <label className={labelCls}>灌木面積 (m²)　<span className="text-slate-400 font-normal">× 1.5</span></label>
             <input type="number" value={shrubArea} onChange={e => setShrubArea(e.target.value)}
@@ -146,7 +205,6 @@ export function NtArticle8({
             </p>
           </div>
 
-          {/* 地被植物 */}
           <div>
             <label className={labelCls}>地被植物面積 (m²)　<span className="text-slate-400 font-normal">× 1</span></label>
             <input type="number" value={groundCoverArea} onChange={e => setGroundCoverArea(e.target.value)}
@@ -156,7 +214,6 @@ export function NtArticle8({
             </p>
           </div>
 
-          {/* 植草磚 */}
           <div>
             <label className={labelCls}>植草磚舖設面積 (m²)　<span className="text-slate-400 font-normal">× 0.5</span></label>
             <input type="number" value={grassBrickArea} onChange={e => setGrassBrickArea(e.target.value)}
@@ -166,7 +223,6 @@ export function NtArticle8({
             </p>
           </div>
 
-          {/* 景觀生態池 */}
           <div>
             <label className={labelCls}>景觀生態池面積 (m²)　<span className="text-slate-400 font-normal">× 1/3</span></label>
             <input type="number" value={pondArea} onChange={e => setPondArea(e.target.value)}
@@ -176,7 +232,6 @@ export function NtArticle8({
             </p>
           </div>
 
-          {/* 藤蔓立面 */}
           <div>
             <label className={labelCls}>藤蔓立面攀附面積 (m²)　<span className="text-slate-400 font-normal">× 1</span></label>
             <input type="number" value={vineArea} onChange={e => setVineArea(e.target.value)}
@@ -186,7 +241,6 @@ export function NtArticle8({
             </p>
           </div>
 
-          {/* 立體綠化補償 */}
           <div>
             <label className={labelCls}>立體綠化面積 (m²)　<span className="text-slate-400 font-normal">屋頂、陽台（補償用）</span></label>
             <input type="number" value={roofGreenArea} onChange={e => setRoofGreenArea(e.target.value)}
@@ -208,15 +262,15 @@ export function NtArticle8({
             </thead>
             <tbody>
               {[
-                { label:`小喬木（5–7cm）× ${treeSmallCount}株`,  input:`${treeSmallCount}株`, coeff:`× ${NT_TREE_COVER.small} m²/株`, val: treeSmallCount * NT_TREE_COVER.small },
-                { label:`中喬木（8–10cm）× ${treeMediumCount}株`, input:`${treeMediumCount}株`, coeff:`× ${NT_TREE_COVER.medium} m²/株`, val: treeMediumCount * NT_TREE_COVER.medium },
-                { label:`大喬木（>10cm）× ${treeLargeCount}株`,  input:`${treeLargeCount}株`, coeff:`× ${NT_TREE_COVER.large} m²/株`, val: treeLargeCount * NT_TREE_COVER.large },
-                { label:'灌木',           input:`${n(shrubArea).toFixed(2)} m²`,        coeff:'× 1.5',  val: shrubCover      },
-                { label:'地被植物',       input:`${n(groundCoverArea).toFixed(2)} m²`,  coeff:'× 1',    val: groundCover     },
-                { label:'植草磚',         input:`${n(grassBrickArea).toFixed(2)} m²`,   coeff:'× 0.5',  val: grassBrickCover },
-                { label:'景觀生態池',     input:`${n(pondArea).toFixed(2)} m²`,          coeff:'× 1/3',  val: pondCover       },
-                { label:'藤蔓立面',       input:`${n(vineArea).toFixed(2)} m²`,          coeff:'× 1',    val: vineCover       },
-                { label:'立體綠化（補償）', input:`${n(roofGreenArea).toFixed(2)} m²`,   coeff:'× 1',    val: roofCover       },
+                { label:`小喬木（5–7cm）× ${treeSmallCount}株`,   input:`${treeSmallCount}株`,              coeff:`× ${NT_TREE_COVER.small} m²/株`,  val: treeSmallCount * NT_TREE_COVER.small },
+                { label:`中喬木（8–10cm）× ${treeMediumCount}株`, input:`${treeMediumCount}株`,             coeff:`× ${NT_TREE_COVER.medium} m²/株`, val: treeMediumCount * NT_TREE_COVER.medium },
+                { label:`大喬木（>10cm）× ${treeLargeCount}株`,   input:`${treeLargeCount}株`,              coeff:`× ${NT_TREE_COVER.large} m²/株`,  val: treeLargeCount * NT_TREE_COVER.large },
+                { label:'灌木',             input:`${n(shrubArea).toFixed(2)} m²`,       coeff:'× 1.5',  val: shrubCover      },
+                { label:'地被植物',         input:`${n(groundCoverArea).toFixed(2)} m²`, coeff:'× 1',    val: groundCover     },
+                { label:'植草磚',           input:`${n(grassBrickArea).toFixed(2)} m²`,  coeff:'× 0.5',  val: grassBrickCover },
+                { label:'景觀生態池',       input:`${n(pondArea).toFixed(2)} m²`,         coeff:'× 1/3',  val: pondCover       },
+                { label:'藤蔓立面',         input:`${n(vineArea).toFixed(2)} m²`,         coeff:'× 1',    val: vineCover       },
+                { label:'立體綠化（補償）', input:`${n(roofGreenArea).toFixed(2)} m²`,    coeff:'× 1',    val: roofCover       },
               ].map(({ label, input, coeff, val }) => (
                 <tr key={label} className={`border-b border-slate-100 ${val <= 0 ? 'opacity-40' : ''}`}>
                   <td className="p-2 border border-slate-200 text-slate-700">{label}</td>
@@ -251,6 +305,82 @@ export function NtArticle8({
             )}
           </div>
         </div>
+      </div>
+
+      {/* ── 第44條：屋頂綠能設施 ── */}
+      <div className={cardCls}>
+        <h2 className={hCls}>第44條：屋頂綠能設施</h2>
+        <p className="text-xs text-slate-500 mb-4">
+          需都設會審議之建築物，屋頂應設置 <strong>≥ 1/2</strong> 面積之綠能設施（屋頂綠化＋太陽光電）。
+        </p>
+
+        {/* 是否需都設會審議 toggle */}
+        <div className="mb-5">
+          <label className="flex items-center gap-3 cursor-pointer select-none w-fit">
+            <div
+              onClick={() => setIsDesignReview(!isDesignReview)}
+              className={`relative w-12 h-6 rounded-full transition-colors ${isDesignReview ? 'bg-emerald-500' : 'bg-slate-300'}`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${isDesignReview ? 'translate-x-6' : ''}`} />
+            </div>
+            <span className="font-semibold text-slate-700">需都市設計審議（都設會）</span>
+          </label>
+          <p className="text-xs text-slate-400 mt-1 ml-15">
+            {isDesignReview ? '適用第44條屋頂綠能規定' : '非都設會審議案，第44條免設'}
+          </p>
+        </div>
+
+        {isDesignReview && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+              <div>
+                <label className={labelCls}>屋頂總面積 (m²)</label>
+                <input type="number" value={roofArea44} onChange={e => setRoofArea44(e.target.value)}
+                  className={inputCls} placeholder="0" min="0" />
+              </div>
+              <div>
+                <label className={labelCls}>屋頂綠能設施面積 (m²)</label>
+                <input type="number" value={roofGreenEnergy44} onChange={e => setRoofGreenEnergy44(e.target.value)}
+                  className={inputCls} placeholder="0" min="0" />
+                <p className="text-xs text-slate-400 mt-1">包含：屋頂綠化面積 ＋ 太陽光電設備投影面積</p>
+              </div>
+            </div>
+
+            <div className={`flex flex-wrap justify-between items-center rounded-lg p-4 border-2 gap-3 ${roof44Pass === true ? 'bg-emerald-50 border-emerald-400' : roof44Pass === false ? 'bg-red-50 border-red-400' : 'bg-slate-50 border-slate-300'}`}>
+              <div>
+                <div className="text-xs text-slate-500">屋頂綠能面積 ÷ 屋頂總面積</div>
+                <div className={`text-3xl font-bold ${roof44Pass === true ? 'text-emerald-700' : roof44Pass === false ? 'text-red-600' : 'text-slate-400'}`}>
+                  {roofA44 > 0 ? `${roofGreenRate44.toFixed(2)}%` : '—'}
+                </div>
+                {roofA44 > 0 && (
+                  <div className="text-xs text-slate-400 mt-0.5">
+                    {n(roofGreenEnergy44).toFixed(2)} ÷ {roofA44.toFixed(2)} m²
+                  </div>
+                )}
+              </div>
+              <div className="text-right">
+                <div className="text-xs text-slate-500">需達</div>
+                <div className="text-3xl font-bold text-slate-700">50%</div>
+                {roofA44 > 0 && roofGreenRate44 < 50 && (
+                  <div className="text-xs text-red-500 mt-1">
+                    尚缺 {(roofA44 * 0.5 - n(roofGreenEnergy44)).toFixed(2)} m²
+                  </div>
+                )}
+              </div>
+              {roof44Pass !== null && (
+                <div className={`text-lg font-bold px-3 py-1 rounded ${roof44Pass ? 'text-emerald-700 bg-emerald-100' : 'text-red-700 bg-red-100'}`}>
+                  {roof44Pass ? '符合' : '不足'}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {!isDesignReview && (
+          <div className="rounded-lg p-4 bg-slate-50 border border-slate-200 text-slate-400 text-sm text-center">
+            非都設會審議案，免設屋頂綠能設施
+          </div>
+        )}
       </div>
     </>
   );

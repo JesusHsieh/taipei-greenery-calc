@@ -6,8 +6,16 @@ export const NT_TREE_COVER = { small: 10, medium: 15, large: 20 } as const;
 
 export function useNewTaipeiCalc() {
   // ── 基地基本資料 ──────────────────────────────────────────────────────────
-  const [openSpace, setOpenSpace] = useState('');  // 實設空地面積
-  const [greenArea, setGreenArea] = useState('');  // 應綠化範圍面積（喬木需求計算用）
+  const [openSpace, setOpenSpace] = useState('');   // 實設空地面積
+  const [greenArea, setGreenArea] = useState('');   // 應綠化範圍面積（喬木需求計算用）
+
+  // ── 第43條：植栽面積 ─────────────────────────────────────────────────────
+  const [nonGreenable43, setNonGreenable43] = useState('');  // 無法綠化之面積
+
+  // ── 第44條：屋頂綠能 ─────────────────────────────────────────────────────
+  const [isDesignReview, setIsDesignReview] = useState(false);  // 是否需都設會審議
+  const [roofArea44, setRoofArea44]           = useState('');    // 屋頂總面積
+  const [roofGreenEnergy44, setRoofGreenEnergy44] = useState(''); // 屋頂綠能面積（綠化＋太陽光電）
 
   // ── 喬木（附表一三分級）─────────────────────────────────────────────────
   const [treeSmall,  setTreeSmall]  = useState('');  // 米高徑 5–7 cm  → 10 m²/株
@@ -52,8 +60,34 @@ export function useNewTaipeiCalc() {
   // 綠覆率 = 總綠覆面積 / 實設空地（第8條(三)(四)）
   const coverRate = os > 0 ? (totalCover / os) * 100 : 0;
 
+  // ── 第43條：植栽面積計算 ──────────────────────────────────────────────────
+  // 可綠化實設空地 = 實設空地 - 無法綠化面積
+  const greenableArea43  = Math.max(0, os - n(nonGreenable43));
+  const requiredPlant43  = greenableArea43 / 2;
+  // 實際植栽面積：以各類植栽實際面積（非加權）計算
+  // 喬木以樹冠投影面積計，灌木/地被/植草磚/池/藤蔓以實際面積計，立體綠化補償計入
+  const actualPlant43 = treeCover
+                      + n(shrubArea)
+                      + n(groundCoverArea)
+                      + n(grassBrickArea)
+                      + n(pondArea)
+                      + n(vineArea)
+                      + n(roofGreenArea);
+
+  // ── 第44條：屋頂綠能設施 ──────────────────────────────────────────────────
+  const roofA44        = n(roofArea44);
+  const roofGE44       = n(roofGreenEnergy44);
+  const roofGreenRate44 = roofA44 > 0 ? (roofGE44 / roofA44) * 100 : 0;
+
   // ── 檢核清單 ──────────────────────────────────────────────────────────────
   const checks = [
+    {
+      art: '第43條', name: '實設空地植栽面積',
+      req: os > 0 ? `≥ ${requiredPlant43.toFixed(2)} m²` : '—',
+      act: `${actualPlant43.toFixed(2)} m²`,
+      pass: os > 0 ? actualPlant43 >= requiredPlant43 : null,
+      formula: `可綠化空地 (${os.toFixed(2)} − ${n(nonGreenable43).toFixed(2)}) m² × 50% = ${requiredPlant43.toFixed(2)} m²`,
+    },
     {
       art: '第8條(一)第3款', name: '喬木配置需求數量',
       req: `≥ ${requiredTrees} 棵`,
@@ -68,6 +102,15 @@ export function useNewTaipeiCalc() {
       pass: os > 0 ? coverRate >= 100 : null,
       formula: `總綠覆 ${totalCover.toFixed(2)} m² ÷ 實設空地 ${os.toFixed(2)} m²`,
     },
+    {
+      art: '第44條', name: '屋頂綠能設施',
+      req: isDesignReview ? '≥ 50%' : '不適用',
+      act: isDesignReview ? (roofA44 > 0 ? `${roofGreenRate44.toFixed(2)}%` : '—') : '—',
+      pass: isDesignReview ? (roofA44 > 0 ? roofGreenRate44 >= 50 : null) : null,
+      formula: isDesignReview
+        ? `屋頂綠能 ${roofGE44.toFixed(2)} m² ÷ 屋頂面積 ${roofA44.toFixed(2)} m²（含綠化＋太陽光電）`
+        : '非都設會審議案，免設',
+    },
   ];
 
   const passCount    = checks.filter(c => c.pass === true).length;
@@ -76,6 +119,10 @@ export function useNewTaipeiCalc() {
 
   return {
     openSpace, setOpenSpace, greenArea, setGreenArea,
+    nonGreenable43, setNonGreenable43,
+    isDesignReview, setIsDesignReview,
+    roofArea44, setRoofArea44,
+    roofGreenEnergy44, setRoofGreenEnergy44,
     treeSmall, setTreeSmall, treeMedium, setTreeMedium, treeLarge, setTreeLarge,
     shrubArea, setShrubArea,
     groundCoverArea, setGroundCoverArea,
@@ -87,6 +134,8 @@ export function useNewTaipeiCalc() {
     treeSmallCount, treeMediumCount, treeLargeCount, totalTreeCount, requiredTrees,
     treeCover, shrubCover, groundCover, grassBrickCover, pondCover, vineCover, roofCover,
     totalCover, coverRate,
+    greenableArea43, requiredPlant43, actualPlant43,
+    roofA44, roofGE44, roofGreenRate44,
     checks, passCount, failCount, pendingCount,
   };
 }

@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Calculator } from 'lucide-react';
-import { useGreeneryCalc } from './hooks/useGreeneryCalc';
-import { SiteBasics }      from './sections/SiteBasics';
-import { Article7 }        from './sections/Article7';
-import { Article8 }        from './sections/Article8';
-import { Article9 }        from './sections/Article9';
-import { Article12 }       from './sections/Article12';
-import { Article5Summary } from './sections/Article5Summary';
-import { CheckResults }    from './sections/CheckResults';
+import { useGreeneryCalc }    from './hooks/useGreeneryCalc';
+import { useNewTaipeiCalc }   from './hooks/useNewTaipeiCalc';
+import { SiteBasics }         from './sections/SiteBasics';
+import { Article7 }           from './sections/Article7';
+import { Article8 }           from './sections/Article8';
+import { Article9 }           from './sections/Article9';
+import { Article12 }          from './sections/Article12';
+import { Article5Summary }    from './sections/Article5Summary';
+import { CheckResults }       from './sections/CheckResults';
+import { NtArticle8 }         from './sections/NtArticle8';
+import { NtCheckResults }     from './sections/NtCheckResults';
 
 type City = 'taipei' | 'newtaipei';
 
@@ -18,7 +21,8 @@ const CITIES: { id: City; label: string; sub: string }[] = [
 
 export default function App() {
   const [city, setCity] = useState<City>('taipei');
-  const c = useGreeneryCalc();
+  const c  = useGreeneryCalc();
+  const nt = useNewTaipeiCalc();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950">
@@ -167,11 +171,54 @@ export default function App() {
       {city === 'newtaipei' && (
         <div className="p-4 md:p-6">
           <div className="max-w-5xl mx-auto">
-            <div className="bg-white rounded-xl shadow-md p-16 text-center">
-              <div className="text-6xl mb-6">🏗️</div>
-              <h2 className="text-2xl font-bold text-slate-700 mb-3">新北市建築基地綠化自治條例</h2>
-              <p className="text-slate-400">法規內容建置中，敬請期待</p>
+
+            {/* Header */}
+            <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <Calculator className="w-9 h-9 text-emerald-600 shrink-0" />
+                <h1 className="text-2xl md:text-3xl font-bold text-slate-800 leading-tight">
+                  新北市都市設計審議原則 第8條 景觀計畫
+                </h1>
+              </div>
+              <p className="text-slate-500 text-sm mb-6">民國110年1月14日修正｜景觀植栽配置及綠覆率檢核</p>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { count: nt.passCount,    label: '✓ 通過',  bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-700', sub: 'text-emerald-800' },
+                  { count: nt.failCount,    label: '✗ 不通過', bg: 'bg-red-50 border-red-200',         text: 'text-red-700',     sub: 'text-red-800'     },
+                  { count: nt.pendingCount, label: '待確認',   bg: 'bg-amber-50 border-amber-200',      text: 'text-amber-700',   sub: 'text-amber-800'   },
+                ].map(({ count, label, bg, text, sub }) => (
+                  <div key={label} className={`${bg} border-2 rounded-xl p-5 text-center`}>
+                    <div className={`text-4xl font-bold ${text}`}>{count}</div>
+                    <div className={`text-sm font-semibold ${sub} mt-1`}>{label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
+
+            <NtArticle8
+              openSpace={nt.openSpace} setOpenSpace={nt.setOpenSpace}
+              greenArea={nt.greenArea} setGreenArea={nt.setGreenArea}
+              treeSmall={nt.treeSmall} setTreeSmall={nt.setTreeSmall}
+              treeMedium={nt.treeMedium} setTreeMedium={nt.setTreeMedium}
+              treeLarge={nt.treeLarge} setTreeLarge={nt.setTreeLarge}
+              shrubArea={nt.shrubArea} setShrubArea={nt.setShrubArea}
+              groundCoverArea={nt.groundCoverArea} setGroundCoverArea={nt.setGroundCoverArea}
+              grassBrickArea={nt.grassBrickArea} setGrassBrickArea={nt.setGrassBrickArea}
+              pondArea={nt.pondArea} setPondArea={nt.setPondArea}
+              vineArea={nt.vineArea} setVineArea={nt.setVineArea}
+              roofGreenArea={nt.roofGreenArea} setRoofGreenArea={nt.setRoofGreenArea}
+              os={nt.os} ga={nt.ga}
+              treeSmallCount={nt.treeSmallCount} treeMediumCount={nt.treeMediumCount}
+              treeLargeCount={nt.treeLargeCount} totalTreeCount={nt.totalTreeCount}
+              requiredTrees={nt.requiredTrees}
+              treeCover={nt.treeCover} shrubCover={nt.shrubCover} groundCover={nt.groundCover}
+              grassBrickCover={nt.grassBrickCover} pondCover={nt.pondCover}
+              vineCover={nt.vineCover} roofCover={nt.roofCover}
+              totalCover={nt.totalCover} coverRate={nt.coverRate}
+            />
+
+            <NtCheckResults checks={nt.checks} />
+
           </div>
         </div>
       )}

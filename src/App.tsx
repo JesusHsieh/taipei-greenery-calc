@@ -201,7 +201,8 @@ export default function App() {
               nonGreenable43={nt.nonGreenable43} setNonGreenable43={nt.setNonGreenable43}
               isDesignReview={nt.isDesignReview} setIsDesignReview={nt.setIsDesignReview}
               roofArea44={nt.roofArea44} setRoofArea44={nt.setRoofArea44}
-              roofGreenEnergy44={nt.roofGreenEnergy44} setRoofGreenEnergy44={nt.setRoofGreenEnergy44}
+              roofPlantArea44={nt.roofPlantArea44} setRoofPlantArea44={nt.setRoofPlantArea44}
+              roofSolarArea44={nt.roofSolarArea44} setRoofSolarArea44={nt.setRoofSolarArea44}
               treeSmall={nt.treeSmall} setTreeSmall={nt.setTreeSmall}
               treeMedium={nt.treeMedium} setTreeMedium={nt.setTreeMedium}
               treeLarge={nt.treeLarge} setTreeLarge={nt.setTreeLarge}
@@ -211,16 +212,18 @@ export default function App() {
               pondArea={nt.pondArea} setPondArea={nt.setPondArea}
               vineArea={nt.vineArea} setVineArea={nt.setVineArea}
               roofGreenArea={nt.roofGreenArea} setRoofGreenArea={nt.setRoofGreenArea}
+              includeRoofInCoverage={nt.includeRoofInCoverage} setIncludeRoofInCoverage={nt.setIncludeRoofInCoverage}
               os={nt.os} ga={nt.ga}
               treeSmallCount={nt.treeSmallCount} treeMediumCount={nt.treeMediumCount}
               treeLargeCount={nt.treeLargeCount} totalTreeCount={nt.totalTreeCount}
               requiredTrees={nt.requiredTrees}
-              treeCover={nt.treeCover} shrubCover={nt.shrubCover} groundCover={nt.groundCover}
+              shrubCover={nt.shrubCover} groundCover={nt.groundCover}
               grassBrickCover={nt.grassBrickCover} pondCover={nt.pondCover}
               vineCover={nt.vineCover} roofCover={nt.roofCover}
               totalCover={nt.totalCover} coverRate={nt.coverRate}
               greenableArea43={nt.greenableArea43} requiredPlant43={nt.requiredPlant43} actualPlant43={nt.actualPlant43}
-              roofA44={nt.roofA44} roofGE44={nt.roofGE44} roofGreenRate44={nt.roofGreenRate44}
+              roofA44={nt.roofA44} roofPA44={nt.roofPA44} roofSA44={nt.roofSA44}
+              roofGreenEnergy44={nt.roofGreenEnergy44} roofGreenRate44={nt.roofGreenRate44}
             />
 
             <NtCheckResults checks={nt.checks} />

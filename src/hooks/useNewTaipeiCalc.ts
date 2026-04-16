@@ -13,24 +13,26 @@ export function useNewTaipeiCalc() {
   const [nonGreenable43, setNonGreenable43] = useState('');  // 無法綠化之面積
 
   // ── 第44條：屋頂綠能 ─────────────────────────────────────────────────────
-  const [isDesignReview, setIsDesignReview] = useState(false);  // 是否需都設會審議
-  const [roofArea44, setRoofArea44]           = useState('');    // 屋頂總面積
-  const [roofGreenEnergy44, setRoofGreenEnergy44] = useState(''); // 屋頂綠能面積（綠化＋太陽光電）
+  const [isDesignReview, setIsDesignReview]     = useState(false);
+  const [roofArea44, setRoofArea44]             = useState('');  // 屋頂總面積
+  const [roofPlantArea44, setRoofPlantArea44]   = useState('');  // 屋頂綠化面積
+  const [roofSolarArea44, setRoofSolarArea44]   = useState('');  // 太陽光電設備面積
 
   // ── 喬木（附表一三分級）─────────────────────────────────────────────────
-  const [treeSmall,  setTreeSmall]  = useState('');  // 米高徑 5–7 cm  → 10 m²/株
-  const [treeMedium, setTreeMedium] = useState('');  // 米高徑 8–10 cm → 15 m²/株
-  const [treeLarge,  setTreeLarge]  = useState('');  // 米高徑 > 10 cm → 20 m²/株
+  const [treeSmall,  setTreeSmall]  = useState('');
+  const [treeMedium, setTreeMedium] = useState('');
+  const [treeLarge,  setTreeLarge]  = useState('');
 
   // ── 其他植栽 ──────────────────────────────────────────────────────────────
-  const [shrubArea,        setShrubArea]        = useState('');  // 灌木（× 1.5）
-  const [groundCoverArea,  setGroundCoverArea]  = useState('');  // 地被植物（× 1）
-  const [grassBrickArea,   setGrassBrickArea]   = useState('');  // 植草磚（× 0.5）
-  const [pondArea,         setPondArea]         = useState('');  // 景觀生態池（× 1/3）
-  const [vineArea,         setVineArea]         = useState('');  // 藤蔓立面（× 1）
+  const [shrubArea,       setShrubArea]       = useState('');
+  const [groundCoverArea, setGroundCoverArea] = useState('');
+  const [grassBrickArea,  setGrassBrickArea]  = useState('');
+  const [pondArea,        setPondArea]        = useState('');
+  const [vineArea,        setVineArea]        = useState('');
 
-  // ── 立體綠化補償（第8條三：屋頂、陽台等水平人工地盤）────────────────────
-  const [roofGreenArea, setRoofGreenArea] = useState('');
+  // ── 立體綠化（屋頂、陽台補償）─────────────────────────────────────────────
+  const [roofGreenArea,          setRoofGreenArea]          = useState('');
+  const [includeRoofInCoverage,  setIncludeRoofInCoverage]  = useState(true);
 
   // ── 計算 ──────────────────────────────────────────────────────────────────
   const os = n(openSpace);
@@ -41,7 +43,6 @@ export function useNewTaipeiCalc() {
   const treeMediumCount = Math.floor(n(treeMedium));
   const treeLargeCount  = Math.floor(n(treeLarge));
   const totalTreeCount  = treeSmallCount + treeMediumCount + treeLargeCount;
-  // 每滿 36m² 應種植1棵（第8條(一)-3）
   const requiredTrees   = ga > 0 ? Math.floor(ga / 36) : 0;
 
   // 各類綠覆面積（第8條(四)）
@@ -53,31 +54,29 @@ export function useNewTaipeiCalc() {
   const grassBrickCover = n(grassBrickArea) * 0.5;
   const pondCover       = n(pondArea) / 3;
   const vineCover       = n(vineArea);
-  const roofCover       = n(roofGreenArea);
+  const roofCover       = includeRoofInCoverage ? n(roofGreenArea) : 0;
 
   const totalCover = treeCover + shrubCover + groundCover + grassBrickCover + pondCover + vineCover + roofCover;
+  const coverRate  = os > 0 ? (totalCover / os) * 100 : 0;
 
-  // 綠覆率 = 總綠覆面積 / 實設空地（第8條(三)(四)）
-  const coverRate = os > 0 ? (totalCover / os) * 100 : 0;
+  // ── 第43條 ────────────────────────────────────────────────────────────────
+  const greenableArea43 = Math.max(0, os - n(nonGreenable43));
+  const requiredPlant43 = greenableArea43 / 2;
+  // 植栽實際面積（喬木以樹冠投影計，其餘以實際面積計，立體綠化補償計入）
+  const actualPlant43   = treeCover
+                        + n(shrubArea)
+                        + n(groundCoverArea)
+                        + n(grassBrickArea)
+                        + n(pondArea)
+                        + n(vineArea)
+                        + n(roofGreenArea);
 
-  // ── 第43條：植栽面積計算 ──────────────────────────────────────────────────
-  // 可綠化實設空地 = 實設空地 - 無法綠化面積
-  const greenableArea43  = Math.max(0, os - n(nonGreenable43));
-  const requiredPlant43  = greenableArea43 / 2;
-  // 實際植栽面積：以各類植栽實際面積（非加權）計算
-  // 喬木以樹冠投影面積計，灌木/地被/植草磚/池/藤蔓以實際面積計，立體綠化補償計入
-  const actualPlant43 = treeCover
-                      + n(shrubArea)
-                      + n(groundCoverArea)
-                      + n(grassBrickArea)
-                      + n(pondArea)
-                      + n(vineArea)
-                      + n(roofGreenArea);
-
-  // ── 第44條：屋頂綠能設施 ──────────────────────────────────────────────────
-  const roofA44        = n(roofArea44);
-  const roofGE44       = n(roofGreenEnergy44);
-  const roofGreenRate44 = roofA44 > 0 ? (roofGE44 / roofA44) * 100 : 0;
+  // ── 第44條 ────────────────────────────────────────────────────────────────
+  const roofA44          = n(roofArea44);
+  const roofPA44         = n(roofPlantArea44);
+  const roofSA44         = n(roofSolarArea44);
+  const roofGreenEnergy44 = roofPA44 + roofSA44;           // 合計綠能面積
+  const roofGreenRate44  = roofA44 > 0 ? (roofGreenEnergy44 / roofA44) * 100 : 0;
 
   // ── 檢核清單 ──────────────────────────────────────────────────────────────
   const checks = [
@@ -108,7 +107,7 @@ export function useNewTaipeiCalc() {
       act: isDesignReview ? (roofA44 > 0 ? `${roofGreenRate44.toFixed(2)}%` : '—') : '—',
       pass: isDesignReview ? (roofA44 > 0 ? roofGreenRate44 >= 50 : null) : null,
       formula: isDesignReview
-        ? `屋頂綠能 ${roofGE44.toFixed(2)} m² ÷ 屋頂面積 ${roofA44.toFixed(2)} m²（含綠化＋太陽光電）`
+        ? `（屋頂綠化 ${roofPA44.toFixed(2)} + 太陽光電 ${roofSA44.toFixed(2)}）m² ÷ 屋頂面積 ${roofA44.toFixed(2)} m²`
         : '非都設會審議案，免設',
     },
   ];
@@ -122,7 +121,8 @@ export function useNewTaipeiCalc() {
     nonGreenable43, setNonGreenable43,
     isDesignReview, setIsDesignReview,
     roofArea44, setRoofArea44,
-    roofGreenEnergy44, setRoofGreenEnergy44,
+    roofPlantArea44, setRoofPlantArea44,
+    roofSolarArea44, setRoofSolarArea44,
     treeSmall, setTreeSmall, treeMedium, setTreeMedium, treeLarge, setTreeLarge,
     shrubArea, setShrubArea,
     groundCoverArea, setGroundCoverArea,
@@ -130,12 +130,13 @@ export function useNewTaipeiCalc() {
     pondArea, setPondArea,
     vineArea, setVineArea,
     roofGreenArea, setRoofGreenArea,
+    includeRoofInCoverage, setIncludeRoofInCoverage,
     os, ga,
     treeSmallCount, treeMediumCount, treeLargeCount, totalTreeCount, requiredTrees,
     treeCover, shrubCover, groundCover, grassBrickCover, pondCover, vineCover, roofCover,
     totalCover, coverRate,
     greenableArea43, requiredPlant43, actualPlant43,
-    roofA44, roofGE44, roofGreenRate44,
+    roofA44, roofPA44, roofSA44, roofGreenEnergy44, roofGreenRate44,
     checks, passCount, failCount, pendingCount,
   };
 }

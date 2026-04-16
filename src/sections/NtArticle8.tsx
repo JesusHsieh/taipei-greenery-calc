@@ -8,7 +8,8 @@ type Props = Pick<NewTaipeiCalc,
   | 'nonGreenable43' | 'setNonGreenable43'
   | 'isDesignReview' | 'setIsDesignReview'
   | 'roofArea44' | 'setRoofArea44'
-  | 'roofGreenEnergy44' | 'setRoofGreenEnergy44'
+  | 'roofPlantArea44' | 'setRoofPlantArea44'
+  | 'roofSolarArea44' | 'setRoofSolarArea44'
   | 'treeSmall' | 'setTreeSmall' | 'treeMedium' | 'setTreeMedium' | 'treeLarge' | 'setTreeLarge'
   | 'shrubArea' | 'setShrubArea'
   | 'groundCoverArea' | 'setGroundCoverArea'
@@ -16,12 +17,13 @@ type Props = Pick<NewTaipeiCalc,
   | 'pondArea' | 'setPondArea'
   | 'vineArea' | 'setVineArea'
   | 'roofGreenArea' | 'setRoofGreenArea'
+  | 'includeRoofInCoverage' | 'setIncludeRoofInCoverage'
   | 'os' | 'ga'
   | 'treeSmallCount' | 'treeMediumCount' | 'treeLargeCount' | 'totalTreeCount' | 'requiredTrees'
-  | 'treeCover' | 'shrubCover' | 'groundCover' | 'grassBrickCover' | 'pondCover' | 'vineCover' | 'roofCover'
+  | 'shrubCover' | 'groundCover' | 'grassBrickCover' | 'pondCover' | 'vineCover' | 'roofCover'
   | 'totalCover' | 'coverRate'
   | 'greenableArea43' | 'requiredPlant43' | 'actualPlant43'
-  | 'roofA44' | 'roofGE44' | 'roofGreenRate44'
+  | 'roofA44' | 'roofPA44' | 'roofSA44' | 'roofGreenEnergy44' | 'roofGreenRate44'
 >;
 
 export function NtArticle8({
@@ -29,7 +31,8 @@ export function NtArticle8({
   nonGreenable43, setNonGreenable43,
   isDesignReview, setIsDesignReview,
   roofArea44, setRoofArea44,
-  roofGreenEnergy44, setRoofGreenEnergy44,
+  roofPlantArea44, setRoofPlantArea44,
+  roofSolarArea44, setRoofSolarArea44,
   treeSmall, setTreeSmall, treeMedium, setTreeMedium, treeLarge, setTreeLarge,
   shrubArea, setShrubArea,
   groundCoverArea, setGroundCoverArea,
@@ -37,17 +40,18 @@ export function NtArticle8({
   pondArea, setPondArea,
   vineArea, setVineArea,
   roofGreenArea, setRoofGreenArea,
+  includeRoofInCoverage, setIncludeRoofInCoverage,
   os, ga,
   treeSmallCount, treeMediumCount, treeLargeCount, totalTreeCount, requiredTrees,
   shrubCover, groundCover, grassBrickCover, pondCover, vineCover, roofCover,
   totalCover, coverRate,
   greenableArea43, requiredPlant43, actualPlant43,
-  roofA44, roofGreenRate44,
+  roofA44, roofPA44, roofSA44, roofGreenEnergy44, roofGreenRate44,
 }: Props) {
 
-  const treeEnough   = ga > 0 ? totalTreeCount >= requiredTrees : null;
-  const plant43Pass  = os > 0 ? actualPlant43 >= requiredPlant43 : null;
-  const roof44Pass   = isDesignReview ? (roofA44 > 0 ? roofGreenRate44 >= 50 : null) : null;
+  const treeEnough  = ga > 0 ? totalTreeCount >= requiredTrees : null;
+  const plant43Pass = os > 0 ? actualPlant43 >= requiredPlant43 : null;
+  const roof44Pass  = isDesignReview ? (roofA44 > 0 ? roofGreenRate44 >= 50 : null) : null;
 
   return (
     <>
@@ -93,7 +97,7 @@ export function NtArticle8({
               </div>
               {os > 0 && (
                 <div className="text-xs text-slate-400 mt-0.5">
-                  ({os.toFixed(2)} − {n(nonGreenable43).toFixed(2)}) m² × 50% = {greenableArea43.toFixed(2)} × 0.5
+                  ({os.toFixed(2)} − {n(nonGreenable43).toFixed(2)}) × 50% = {greenableArea43.toFixed(2)} × 0.5
                 </div>
               )}
             </div>
@@ -145,9 +149,9 @@ export function NtArticle8({
 
         <div className="grid grid-cols-3 gap-4 mb-4">
           {[
-            { label: '小喬木（5–7 cm）', val: treeSmall, set: setTreeSmall, cover: NT_TREE_COVER.small, count: treeSmallCount },
+            { label: '小喬木（5–7 cm）',  val: treeSmall,  set: setTreeSmall,  cover: NT_TREE_COVER.small,  count: treeSmallCount  },
             { label: '中喬木（8–10 cm）', val: treeMedium, set: setTreeMedium, cover: NT_TREE_COVER.medium, count: treeMediumCount },
-            { label: '大喬木（> 10 cm）', val: treeLarge, set: setTreeLarge, cover: NT_TREE_COVER.large, count: treeLargeCount },
+            { label: '大喬木（> 10 cm）', val: treeLarge,  set: setTreeLarge,  cover: NT_TREE_COVER.large,  count: treeLargeCount  },
           ].map(({ label, val, set, cover, count }) => (
             <div key={label}>
               <label className={labelCls}>{label}（株）</label>
@@ -241,11 +245,30 @@ export function NtArticle8({
             </p>
           </div>
 
-          <div>
-            <label className={labelCls}>立體綠化面積 (m²)　<span className="text-slate-400 font-normal">屋頂、陽台（補償用）</span></label>
+          {/* 立體綠化（含計入綠覆率開關） */}
+          <div className={`rounded-lg p-3 border-2 transition-colors ${includeRoofInCoverage ? 'border-teal-300 bg-teal-50/30' : 'border-slate-200 bg-slate-50'}`}>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-semibold text-slate-700">
+                屋頂、陽台立體綠化面積 (m²)
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <span className="text-xs text-slate-500">計入綠覆率</span>
+                <div
+                  onClick={() => setIncludeRoofInCoverage(!includeRoofInCoverage)}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${includeRoofInCoverage ? 'bg-teal-500' : 'bg-slate-300'}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${includeRoofInCoverage ? 'translate-x-5' : ''}`} />
+                </div>
+              </label>
+            </div>
             <input type="number" value={roofGreenArea} onChange={e => setRoofGreenArea(e.target.value)}
               className={inputCls} placeholder="0" min="0" />
-            <p className="text-xs text-slate-400 mt-1">第8條(三)：地面層不足時以屋頂、陽台等人工地盤補足</p>
+            <p className="text-xs mt-1">
+              {includeRoofInCoverage
+                ? <span className="text-teal-600 font-semibold">計入 = {roofCover.toFixed(2)} m²（已納入綠覆率）</span>
+                : <span className="text-slate-400">未計入綠覆率（第8條(三) 補償用，可依需求開啟）</span>
+              }
+            </p>
           </div>
         </div>
 
@@ -262,17 +285,23 @@ export function NtArticle8({
             </thead>
             <tbody>
               {[
-                { label:`小喬木（5–7cm）× ${treeSmallCount}株`,   input:`${treeSmallCount}株`,              coeff:`× ${NT_TREE_COVER.small} m²/株`,  val: treeSmallCount * NT_TREE_COVER.small },
+                { label:`小喬木（5–7cm）× ${treeSmallCount}株`,   input:`${treeSmallCount}株`,              coeff:`× ${NT_TREE_COVER.small} m²/株`,  val: treeSmallCount * NT_TREE_COVER.small  },
                 { label:`中喬木（8–10cm）× ${treeMediumCount}株`, input:`${treeMediumCount}株`,             coeff:`× ${NT_TREE_COVER.medium} m²/株`, val: treeMediumCount * NT_TREE_COVER.medium },
-                { label:`大喬木（>10cm）× ${treeLargeCount}株`,   input:`${treeLargeCount}株`,              coeff:`× ${NT_TREE_COVER.large} m²/株`,  val: treeLargeCount * NT_TREE_COVER.large },
+                { label:`大喬木（>10cm）× ${treeLargeCount}株`,   input:`${treeLargeCount}株`,              coeff:`× ${NT_TREE_COVER.large} m²/株`,  val: treeLargeCount * NT_TREE_COVER.large  },
                 { label:'灌木',             input:`${n(shrubArea).toFixed(2)} m²`,       coeff:'× 1.5',  val: shrubCover      },
                 { label:'地被植物',         input:`${n(groundCoverArea).toFixed(2)} m²`, coeff:'× 1',    val: groundCover     },
                 { label:'植草磚',           input:`${n(grassBrickArea).toFixed(2)} m²`,  coeff:'× 0.5',  val: grassBrickCover },
                 { label:'景觀生態池',       input:`${n(pondArea).toFixed(2)} m²`,         coeff:'× 1/3',  val: pondCover       },
                 { label:'藤蔓立面',         input:`${n(vineArea).toFixed(2)} m²`,         coeff:'× 1',    val: vineCover       },
-                { label:'立體綠化（補償）', input:`${n(roofGreenArea).toFixed(2)} m²`,    coeff:'× 1',    val: roofCover       },
-              ].map(({ label, input, coeff, val }) => (
-                <tr key={label} className={`border-b border-slate-100 ${val <= 0 ? 'opacity-40' : ''}`}>
+                {
+                  label: includeRoofInCoverage ? '立體綠化（計入）' : '立體綠化（未計入）',
+                  input:`${n(roofGreenArea).toFixed(2)} m²`,
+                  coeff:'× 1',
+                  val: roofCover,
+                  dim: !includeRoofInCoverage,
+                },
+              ].map(({ label, input, coeff, val, dim }) => (
+                <tr key={label} className={`border-b border-slate-100 ${(val <= 0 || dim) ? 'opacity-40' : ''}`}>
                   <td className="p-2 border border-slate-200 text-slate-700">{label}</td>
                   <td className="p-2 border border-slate-200 text-right">{input}</td>
                   <td className="p-2 border border-slate-200 text-right text-blue-600">{coeff}</td>
@@ -311,7 +340,7 @@ export function NtArticle8({
       <div className={cardCls}>
         <h2 className={hCls}>第44條：屋頂綠能設施</h2>
         <p className="text-xs text-slate-500 mb-4">
-          需都設會審議之建築物，屋頂應設置 <strong>≥ 1/2</strong> 面積之綠能設施（屋頂綠化＋太陽光電）。
+          需都設會審議之建築物，屋頂應設置 <strong>≥ 1/2</strong> 面積之綠能設施（屋頂綠化面積 ＋ 太陽光電設備面積）。
         </p>
 
         {/* 是否需都設會審議 toggle */}
@@ -332,29 +361,51 @@ export function NtArticle8({
 
         {isDesignReview && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
               <div>
                 <label className={labelCls}>屋頂總面積 (m²)</label>
                 <input type="number" value={roofArea44} onChange={e => setRoofArea44(e.target.value)}
                   className={inputCls} placeholder="0" min="0" />
+                <p className="text-xs text-slate-400 mt-1">計算基準</p>
               </div>
               <div>
-                <label className={labelCls}>屋頂綠能設施面積 (m²)</label>
-                <input type="number" value={roofGreenEnergy44} onChange={e => setRoofGreenEnergy44(e.target.value)}
+                <label className={labelCls}>屋頂綠化面積 (m²)</label>
+                <input type="number" value={roofPlantArea44} onChange={e => setRoofPlantArea44(e.target.value)}
                   className={inputCls} placeholder="0" min="0" />
-                <p className="text-xs text-slate-400 mt-1">包含：屋頂綠化面積 ＋ 太陽光電設備投影面積</p>
+                <p className="text-xs text-emerald-600 font-semibold mt-1">
+                  {roofPA44.toFixed(2)} m²
+                </p>
+              </div>
+              <div>
+                <label className={labelCls}>太陽光電設備面積 (m²)</label>
+                <input type="number" value={roofSolarArea44} onChange={e => setRoofSolarArea44(e.target.value)}
+                  className={inputCls} placeholder="0" min="0" />
+                <p className="text-xs text-emerald-600 font-semibold mt-1">
+                  {roofSA44.toFixed(2)} m²
+                </p>
+              </div>
+            </div>
+
+            {/* 合計帶狀說明 */}
+            <div className="bg-slate-50 rounded-lg p-3 border border-slate-200 mb-4 text-sm">
+              <div className="flex flex-wrap items-center gap-2 text-slate-600">
+                <span>屋頂綠化 <strong className="text-slate-800">{roofPA44.toFixed(2)}</strong> m²</span>
+                <span className="text-slate-400">＋</span>
+                <span>太陽光電 <strong className="text-slate-800">{roofSA44.toFixed(2)}</strong> m²</span>
+                <span className="text-slate-400">=</span>
+                <span className="font-bold text-emerald-700">{roofGreenEnergy44.toFixed(2)} m² 合計綠能面積</span>
               </div>
             </div>
 
             <div className={`flex flex-wrap justify-between items-center rounded-lg p-4 border-2 gap-3 ${roof44Pass === true ? 'bg-emerald-50 border-emerald-400' : roof44Pass === false ? 'bg-red-50 border-red-400' : 'bg-slate-50 border-slate-300'}`}>
               <div>
-                <div className="text-xs text-slate-500">屋頂綠能面積 ÷ 屋頂總面積</div>
+                <div className="text-xs text-slate-500">合計綠能面積 ÷ 屋頂總面積</div>
                 <div className={`text-3xl font-bold ${roof44Pass === true ? 'text-emerald-700' : roof44Pass === false ? 'text-red-600' : 'text-slate-400'}`}>
                   {roofA44 > 0 ? `${roofGreenRate44.toFixed(2)}%` : '—'}
                 </div>
                 {roofA44 > 0 && (
                   <div className="text-xs text-slate-400 mt-0.5">
-                    {n(roofGreenEnergy44).toFixed(2)} ÷ {roofA44.toFixed(2)} m²
+                    {roofGreenEnergy44.toFixed(2)} ÷ {roofA44.toFixed(2)} m²
                   </div>
                 )}
               </div>
@@ -363,7 +414,7 @@ export function NtArticle8({
                 <div className="text-3xl font-bold text-slate-700">50%</div>
                 {roofA44 > 0 && roofGreenRate44 < 50 && (
                   <div className="text-xs text-red-500 mt-1">
-                    尚缺 {(roofA44 * 0.5 - n(roofGreenEnergy44)).toFixed(2)} m²
+                    尚缺 {(roofA44 * 0.5 - roofGreenEnergy44).toFixed(2)} m²
                   </div>
                 )}
               </div>

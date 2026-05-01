@@ -1,5 +1,7 @@
 # Greenery Architect｜建築基地綠化法規檢核系統
 
+> ⚠️ 此專案已整合至 LandWeaver AI，請前往新版本：https://land-weaver-ai.vercel.app
+
 > **v1.0.0** — 台北市 + 新北市雙城市法規完整檢核，Clinical Architect 介面設計
 
 🌐 **線上版本**：https://jesushsieh.github.io/taipei-greenery-calc/
